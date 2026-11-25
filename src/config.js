@@ -20,6 +20,7 @@ export const PHYSICS = {
   REVERSE_MAX: 45,
   COAST: 0.16,
   HANDBRAKE: 0.5,
+  DRIFT_DRAG: 0.08,           // speed lost per tick while mouse-drifting
   LAPS: 3,
 };
 

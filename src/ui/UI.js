@@ -47,7 +47,7 @@ export class UI {
       b.dataset.key = key;
       b.dataset.sfx = '';
       b.style.setProperty('--c', c.accent);
-      b.innerHTML = `<span class="sw" style="background:linear-gradient(160deg,${c.swatch.join(',')})"></span><span><b>${c.name}</b><small>${c.subtitle}</small></span>`;
+      b.innerHTML = `<span class="sw" style="background:linear-gradient(160deg,${c.swatch.join(',')})"></span><span><b>${c.name}</b></span>`;
       b.onclick = () => { this.g.setTheme(key); panel.classList.remove('open'); };
       panel.appendChild(b);
     }
@@ -57,7 +57,6 @@ export class UI {
     const s = this.g.sel;
     const c = CITIES[s.theme];
     $('themeName').textContent = c.name;
-    $('themeSub').textContent = c.subtitle;
     $('themeSwatch').style.background = `linear-gradient(160deg,${c.swatch.join(',')})`;
     document.querySelectorAll('.theme-opt').forEach((b) => b.classList.toggle('active', b.dataset.key === s.theme));
     const car = CARS.find((x) => x.id === s.car);
@@ -107,7 +106,7 @@ export class UI {
       el.dataset.key = key;
       el.dataset.sfx = '';
       el.style.setProperty('--c', c.accent);
-      el.innerHTML = `<svg viewBox="0 0 100 100" style="background:linear-gradient(160deg,${c.swatch.join(',')})"><path d="${path}"/></svg><b>${c.name}</b><small>${c.subtitle}</small>`;
+      el.innerHTML = `<svg viewBox="0 0 100 100" style="background:linear-gradient(160deg,${c.swatch.join(',')})"><path d="${path}"/></svg><b>${c.name}</b>`;
       el.onclick = () => { this.g.sel.map = key; this.g.saveSel(); this.refreshSelect(); };
       list.appendChild(el);
     }

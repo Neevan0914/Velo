@@ -175,7 +175,7 @@ export class Race {
     const k = this.input.keys, p = this.player, c = p.controls;
     if (p.finished) {
       // autopilot after the flag
-      c.throttle = p.speed < 60 ? 0.6 : 0; c.brake = p.speed > 80 ? 0.4 : 0; c.nitro = false; c.handbrake = false;
+      c.throttle = p.speed < 60 ? 0.6 : 0; c.brake = p.speed > 80 ? 0.4 : 0; c.nitro = false; c.handbrake = false; c.drift = 0;
       const ti = this.track.wrap(p.idx + 20);
       const tp = this.track.pointAt(ti, 0);
       c.steer = clamp(angleDiff(Math.atan2(tp.x - p.x, tp.z - p.z), p.heading) * 2.5, -1, 1);
@@ -185,6 +185,10 @@ export class Race {
     c.brake = k.KeyS || k.ArrowDown ? 1 : 0;
     c.steer = (k.KeyA || k.ArrowLeft ? 1 : 0) - (k.KeyD || k.ArrowRight ? 1 : 0);
     c.handbrake = !!k.Space;
+    // mouse drift: LMB = drift left, RMB = drift right (both held = no drift)
+    const mb = this.input.buttons;
+    c.drift = (mb.left ? 1 : 0) - (mb.right ? 1 : 0);
+    if (c.drift) c.steer = c.drift;
     c.nitro = !!k.KeyF;
     if (!locked && this.input.consume('KeyR')) { p.respawn(); this.flash('RESET', false, 700); }
     if (this.input.consume('KeyC')) { this.camMode = (this.camMode + 1) % 3; }

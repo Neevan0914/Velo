@@ -26,6 +26,7 @@ The game needs a desktop browser with WebGL 2 (Chrome, Edge, Firefox or Safari),
 | **A / D** | Steer |
 | **Mouse** | Look around (click the game to capture the mouse) |
 | **F** | Nitro |
+| **Left / right mouse button** (hold) | Drift left / right |
 | **Space** | Handbrake, for drifting through tight corners |
 | **C** | Switch camera (chase / hood / far) |
 | **R** | Put the car back on the track |
@@ -34,7 +35,7 @@ The game needs a desktop browser with WebGL 2 (Chrome, Edge, Firefox or Safari),
 
 ### Flow
 
-1. **Main menu.** Your current car turns on a lit turntable on the right, with the red **PLAY** button under it. The **THEME** button on the left changes the backdrop city: Las Vegas, New York, Paris, London or Singapore.
+1. **Main menu.** Your current car sits on a turntable on the right, with the red **PLAY** button under it. The **THEME** button on the left changes the backdrop city: Las Vegas, New York, Paris, London or Singapore.
 2. **Garage.** After **PLAY**, you choose a car from the curved wheel along the bottom (click a card, use the arrows, scroll, drag, or press A/D). You also pick **one** boost and a **map**. Then press **START RACE**.
 3. **Race.** You start at the back of a 6-car grid against 5 bots. After a camera fly-in, the race starts with a **3, 2, 1, GO!** countdown, and the lights on the start gantry light up with it. The race is **3 laps**. The leaderboard is in the top left, lap and times in the top centre, the minimap in the top right, and the speedometer in **km/h** in the bottom right with the nitro gauge.
 4. **Results.** You see the finishing order, total times and best laps. You can race again, go back to the garage or return to the main menu.

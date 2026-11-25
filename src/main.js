@@ -24,7 +24,22 @@ class Input {
       this.keys[e.code] = true;
     });
     window.addEventListener('keyup', (e) => { this.keys[e.code] = false; });
-    window.addEventListener('blur', () => { this.keys = {}; });
+    window.addEventListener('blur', () => { this.keys = {}; this.buttons = { left: false, right: false }; });
+    // mouse buttons drift: left button = drift left, right button = drift right
+    this.buttons = { left: false, right: false };
+    this.requireLock = true; // the click that captures the mouse is not a drift
+    window.addEventListener('mousedown', (e) => {
+      if (!this.mouseEnabled) return;
+      if (this.requireLock && !document.pointerLockElement) return;
+      if (e.button === 0) this.buttons.left = true;
+      if (e.button === 2) this.buttons.right = true;
+    });
+    window.addEventListener('mouseup', (e) => {
+      if (e.button === 0) this.buttons.left = false;
+      if (e.button === 2) this.buttons.right = false;
+    });
+    window.addEventListener('contextmenu', (e) => { if (this.mouseEnabled) e.preventDefault(); });
+    document.addEventListener('pointerlockerror', () => { this.requireLock = false; });
     window.addEventListener('mousemove', (e) => {
       if (!this.mouseEnabled) return;
       this.mdx += e.movementX || 0;
@@ -33,7 +48,7 @@ class Input {
   }
   consume(code) { if (this.pressed.has(code)) { this.pressed.delete(code); return true; } return false; }
   consumeMouse() { const m = { dx: this.mdx, dy: this.mdy }; this.mdx = this.mdy = 0; return m; }
-  clear() { this.pressed.clear(); this.mdx = this.mdy = 0; }
+  clear() { this.pressed.clear(); this.mdx = this.mdy = 0; this.buttons = { left: false, right: false }; }
 }
 
 class Game {
@@ -156,39 +171,23 @@ class Game {
     const root = new THREE.Group();
     root.position.copy(p);
     root.rotation.y = h;
-    const accent = CITIES[this.worldKey].accent;
     const plate = new THREE.Mesh(new THREE.CylinderGeometry(3.7, 3.85, 0.14, 72), new THREE.MeshPhysicalMaterial({
-      color: '#0c0d12', metalness: 0.6, roughness: 0.18, clearcoat: 1, clearcoatRoughness: 0.05,
+      color: '#121318', metalness: 0.2, roughness: 0.75, clearcoat: 0,
     }));
     plate.position.y = 0.07;
     plate.receiveShadow = true;
     root.add(plate);
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(3.78, 0.045, 8, 128), new THREE.MeshBasicMaterial({ color: new THREE.Color(accent).multiplyScalar(4) }));
-    ring.rotation.x = Math.PI / 2;
-    ring.position.y = 0.145;
-    root.add(ring);
-    const halo = new THREE.Mesh(new THREE.PlaneGeometry(11, 11), new THREE.MeshBasicMaterial({
-      map: glowTexture(), color: new THREE.Color(accent).multiplyScalar(0.8), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
-    }));
-    halo.rotation.x = -Math.PI / 2;
-    halo.position.y = 0.03;
-    root.add(halo);
     const spin = new THREE.Group();
     spin.position.y = 0.14;
     root.add(spin);
-    const keyL = new THREE.SpotLight('#ffffff', 70, 30, 0.6, 0.6, 1.5);
+    const keyL = new THREE.SpotLight('#ffffff', 40, 30, 0.6, 0.6, 1.5);
     keyL.position.set(2, 9, 5);
     keyL.castShadow = true;
     keyL.shadow.mapSize.set(1024, 1024);
     keyL.target.position.set(0, 0, 0);
     root.add(keyL, keyL.target);
-    const rim = new THREE.PointLight(accent, 18, 14, 1.6);
-    rim.position.set(-4, 2.5, -4);
-    const rim2 = new THREE.PointLight('#7fd8ff', 12, 14, 1.6);
-    rim2.position.set(4, 2, -3);
-    root.add(rim, rim2);
     this.world.group.add(root);
-    this.showcase = { root, spin, car: null, angle: 0.6 };
+    this.showcase = { root, spin, car: null, angle: -0.7 }; // fixed front three-quarter view
     this.setShowcaseCar(this.sel.car);
   }
 
@@ -243,7 +242,9 @@ class Game {
     const def = CARS.find((c) => c.id === id);
     s.car = buildCar(def, { beams: false });
     s.car.group.traverse((o) => { if (o.isMesh) o.castShadow = true; });
-    s.car.flareMat.opacity = 0.6;
+    s.car.flareMat.opacity = 0;
+    s.car.tailFlareMat.opacity = 0;
+    if (s.car.glow) s.car.glow.visible = false;
     s.spin.add(s.car.group);
     s.pop = 0;
   }
@@ -260,7 +261,6 @@ class Game {
   updateShowcase(dt) {
     const s = this.showcase;
     if (!s) return;
-    s.angle += dt * 0.32;
     s.spin.rotation.y = s.angle;
     s.pop = Math.min(1, (s.pop ?? 1) + dt * 2.5);
     const e = 1 - Math.pow(1 - s.pop, 3);
@@ -279,10 +279,11 @@ class Game {
     if (!this.camInit) { cam.position.copy(local); this.camInit = true; }
     cam.position.lerp(local, 1 - Math.exp(-dt * 3));
     cam.lookAt(target);
+    this.R.bloom.strength = 0.4; // softer glow on the showroom screens
     cam.fov = sel ? 38 : 40;
     cam.updateProjectionMatrix();
     if (sel) this.R.setViewShift(0, 0.07);
-    else this.R.setViewShift(0.22, 0.17);
+    else this.R.setViewShift(0.22, 0.22);
   }
 
   // ------------------------------------------------------------------ state changes
@@ -356,6 +357,7 @@ class Game {
       audio: this.audio, ui: this.ui, input: this.input,
     });
     this.race.onResults = () => this.showResults();
+    this.R.bloom.strength = 0.8;
     this.input.clear();
     this.input.mouseEnabled = true;
     this.state = 'race';

@@ -27,7 +27,7 @@ export class Vehicle {
     this.object = this.model.group;
     if (!night) this.model.beam.visible = false;
 
-    this.controls = { throttle: 0, brake: 0, steer: 0, nitro: false, handbrake: false };
+    this.controls = { throttle: 0, brake: 0, steer: 0, nitro: false, handbrake: false, drift: 0 };
     this.reset(0, 0);
   }
 
@@ -106,6 +106,7 @@ export class Vehicle {
     }
     if (a === 0 && c.throttle === 0 && c.brake === 0) a = -Math.sign(this.speed) * Math.min(Math.abs(this.speed), P.COAST);
     if (c.handbrake) a -= Math.sign(this.speed) * Math.min(Math.abs(this.speed), P.HANDBRAKE);
+    else if (c.drift) a -= Math.sign(this.speed) * Math.min(Math.abs(this.speed), P.DRIFT_DRAG);
     this.speed += a * tick;
     if (this.speed > cap) this.speed = Math.max(cap, this.speed - 0.35 * tick); // bleed off after nitro
     // steering scrub at high speed
@@ -116,16 +117,16 @@ export class Vehicle {
     const rate = Math.abs(target) > Math.abs(this.steer) ? 6 : 9;
     this.steer += (target - this.steer) * Math.min(1, dt * rate);
     const v = this.speedMs;
-    let yaw = this.steer * this.yawCapability(v) * (c.handbrake ? 1.45 : 1);
+    let yaw = this.steer * this.yawCapability(v) * (c.handbrake ? 1.45 : c.drift ? 1.55 : 1);
     if (v < 0) yaw = -yaw;
     this.heading += yaw * dt;
 
     // grip: direction of travel chases the heading
-    const grip = c.handbrake ? 1.6 : 7.5;
+    const grip = c.handbrake ? 1.6 : c.drift ? 2.4 : 7.5;
     const d = angleDiff(this.heading, this.velAngle);
     this.velAngle += d * Math.min(1, grip * dt);
     this.slip = angleDiff(this.heading, this.velAngle);
-    this.speed *= 1 - Math.min(0.5, Math.abs(this.slip)) * 0.012 * tick;
+    this.speed *= 1 - Math.min(0.5, Math.abs(this.slip)) * (c.drift && !c.handbrake ? 0.004 : 0.012) * tick;
 
     // --- integrate --------------------------------------------------------
     const dirSign = 1;
