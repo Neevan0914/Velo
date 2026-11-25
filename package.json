@@ -1,0 +1,28 @@
+{
+  "name": "velo",
+  "version": "1.0.0",
+  "description": "Velo - arcade street racing in the browser",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Neevan0914/Velo.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Neevan0914/Velo/issues"
+  },
+  "homepage": "https://github.com/Neevan0914/Velo#readme",
+  "dependencies": {
+    "three": "^0.170.0"
+  },
+  "devDependencies": {
+    "vite": "^5.4.11"
+  },
+  "type": "module"
+}
